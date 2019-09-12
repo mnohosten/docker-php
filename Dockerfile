@@ -1,6 +1,11 @@
 FROM php:7.3-apache
 MAINTAINER Martin Krizan <mnohosten@gmail.com>
 
+ARG DEBIAN_FRONTEND=noninteractive
+ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_PROCESS_TIMEOUT 3600
+
 RUN apt-get -y update
 RUN apt-get install -y \
     git \
@@ -56,7 +61,9 @@ RUN echo "session.gc_maxlifetime=1209600" >> /usr/local/etc/php/php.ini
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
 # Composer
-RUN curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/bin/composer \
-    && composer global require hirak/prestissimo \
-    && ln -s /root/.composer/vendor/bin/* /usr/local/bin/
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
+
+# PDO Firebird
+RUN apt-get install -y firebird-dev
+RUN docker-php-ext-install pdo_firebird
+
