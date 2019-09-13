@@ -1,11 +1,12 @@
-FROM php:7.1-cli-alpine
+FROM php:7.1-apache-stretch
 MAINTAINER Martin Krizan <mnohosten@gmail.com>
 
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_PROCESS_TIMEOUT 3600
 
-RUN apk add --no-cache \
+RUN apt-get update
+RUN apt-get install -y \
     git \
     mc \
     curl \
@@ -16,6 +17,13 @@ RUN apk add --no-cache \
     libedit-dev \
     freetds-dev \
     libzip-dev \
+    libicu-dev \
+    libkrb5-dev \
+    libc-client-dev \
+    autoconf \
+    g++ \
+    make \
+    bash \
     rsyslog
 
 # Install PHP extensions
@@ -24,15 +32,15 @@ RUN docker-php-ext-install soap
 RUN docker-php-ext-install gd
 RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-install mysqli
-RUN apk add --no-cache icu-dev && docker-php-ext-install intl
+RUN docker-php-ext-install intl
 RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install xmlrpc
 RUN docker-php-ext-install bcmath
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-install opcache
-RUN apk add --no-cache imap-dev openssl-dev && docker-php-ext-configure imap --with-imap --with-imap-ssl && docker-php-ext-install imap
-RUN apk add --no-cache autoconf g++ make
+RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+    && docker-php-ext-install imap
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 RUN docker-php-ext-install sockets
 # Blackfire
@@ -47,7 +55,5 @@ RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/php.ini
 RUN echo "session.gc_maxlifetime=1209600" >> /usr/local/etc/php/php.ini
 # Composer & Symfony
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
-RUN apk add --no-cache bash
 RUN wget https://get.symfony.com/cli/installer -O - | bash
-RUN composer global require hirak/prestissimo && \
-    composer global require symfony/flex
+RUN composer global require hirak/prestissimo
