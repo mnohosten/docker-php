@@ -57,3 +57,5 @@ RUN echo "session.gc_maxlifetime=1209600" >> /usr/local/etc/php/php.ini
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
 RUN wget https://get.symfony.com/cli/installer -O - | bash
 RUN composer global require hirak/prestissimo
+
+WORKDIR /var/www
