@@ -58,4 +58,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN wget https://get.symfony.com/cli/installer -O - | bash
 RUN composer global require hirak/prestissimo
 
+RUN a2enmod rewrite
+
 WORKDIR /var/www
